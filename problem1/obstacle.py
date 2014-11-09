@@ -1,11 +1,8 @@
-import pygame.rect
-
-import Point
+import abc
 
 class Obstacle(object):
+    __metaclass__ = abc.ABCMeta
 
-    def __init__(self, shape):
-        self.shape = shape
-
-    def collides_with_point(point):
-        return self.shape.collidepoint(point.x, point.y)
+    @abc.abstractmethod
+    def contains(self, point):
+        """Returns whether the given point is inside the obstacle"""

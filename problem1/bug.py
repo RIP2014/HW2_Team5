@@ -24,3 +24,9 @@ class Bug(object):
 
         # keep track of closest point
         return False
+
+    def solve(self):
+
+        while not self.at_goal():
+
+            self.move()

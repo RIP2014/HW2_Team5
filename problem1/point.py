@@ -17,4 +17,4 @@ class Point(object):
 
     def distance_to(self, point):
 
-        return math.sqrt(math.pow(point.x - self.x, 2) + math.pow(point.y - self.y, 2))
+        return math.sqrt((point.x - self.x)**2 + (point.y - self.y)**2)
