@@ -29,6 +29,7 @@ public class armviswithobstacles extends JPanel {
 	private double[] currCoords = {2.6,1.3,1.0};
 	private double[] currAngles = {-.635, 1.507, 1};
 	private double[] desiredCoords = {-1.4,1.6,-2.0};
+	private double[] desiredAngles = {1.37, 2.5, -2.0};
 	double[] fieldPotential = {0,0,0};
 	double[] fieldx = {0,0,0};
 	double[] fieldy = {0,0,0};
@@ -82,7 +83,7 @@ public class armviswithobstacles extends JPanel {
 		g.fillOval(230-4, 220-4, 8, 8);
 		g.fillOval(430-4, 235-4, 8, 8);
 		g.setColor(Color.BLACK);
-		g.fillOval(250, 150, 50, 50);
+		g.fillOval(250, 100, 50, 50);
 	}
 	
 	public static void main(String [] args) {
@@ -100,17 +101,17 @@ public class armviswithobstacles extends JPanel {
 	public void run() {
 		while (true) {
 		double distToGoal = Math.sqrt(Math.pow((desiredCoords[0] * 50) - currCoords[0] * 50,2) + Math.pow(desiredCoords[1] - currCoords[1], 2));
-		fieldPotential[0] = Math.sqrt((a1x2-250)*(a1x2-250) + (a1y2-150)*(a1y2-150));
-		fieldPotential[1] = Math.sqrt((a2x2-250)*(a2x2-250) + (a2y2-150)*(a2y2-150));
-		fieldPotential[2] = Math.sqrt((a3x2-250)*(a3x2-250) + (a3y2-150)*(a3y2-150));
-		angleFromObstacle[0] = Math.atan2(a1x2 - 250, a1y2 - 150);
-		angleFromObstacle[1] = Math.atan2(a2x2 - 250, a2y2 - 150);
-		angleFromObstacle[2] = Math.atan2(a3x2 - 250, a3y2 - 150);
+		fieldPotential[0] = Math.sqrt((a1x2-250)*(a1x2-250) + (a1y2-100)*(a1y2-100));
+		fieldPotential[1] = Math.sqrt((a2x2-250)*(a2x2-250) + (a2y2-100)*(a2y2-100));
+		fieldPotential[2] = Math.sqrt((a3x2-250)*(a3x2-250) + (a3y2-100)*(a3y2-100));
+		angleFromObstacle[0] = Math.atan2(a1x2 - 250, a1y2 - 100);
+		angleFromObstacle[1] = Math.atan2(a2x2 - 250, a2y2 - 100);
+		angleFromObstacle[2] = Math.atan2(a3x2 - 250, a3y2 - 100);
 		for (int i=0;i<3;i++) {
 			int z = 0;
 			if (fieldPotential[i] < 50) {
 				z=1;
-			} else if (fieldPotential[i] < 70) {
+			} else if (fieldPotential[i] < 80) {
 				z=2;
 			}
 			switch (z) {
@@ -121,13 +122,13 @@ public class armviswithobstacles extends JPanel {
 				case 0:		fieldx[i] = 0;
 							fieldy[i] = 0;
 							break;
-				case 2:		fieldx[i] = -.1 * (((70) - fieldPotential[i])* Math.cos(distToGoal)) - .1*(70-fieldPotential[i]) * Math.cos(angleFromObstacle[i]);
-							fieldy[i] = -.1 * (((70) - fieldPotential[i])* Math.sin(distToGoal)) - .1*(70-fieldPotential[i]) * Math.sin(angleFromObstacle[i]);
+				case 2:		fieldx[i] = -.1 * (((80) - fieldPotential[i])* Math.cos(distToGoal)) - .1*(80-fieldPotential[i]) * Math.cos(angleFromObstacle[i]);
+							fieldy[i] = -.1 * (((80) - fieldPotential[i])* Math.sin(distToGoal)) - .1*(80-fieldPotential[i]) * Math.sin(angleFromObstacle[i]);
 							break;
 					
 			}
 		}
-		double[][] ij = ij(desiredCoords);
+		double[][] ij = ij(desiredAngles);
 		for (int i=0;i<3;i++) {
 			double x = 0;
 			for (int j=0;j<3;j++) {
@@ -147,7 +148,7 @@ public class armviswithobstacles extends JPanel {
 		currCoords[1] = (300 - a3y2) / 50;
 		currCoords[2] = a3theta;
 		try {
-			Thread.sleep(20);
+			Thread.sleep(100);
 		}
 		catch (InterruptedException e) {
 			

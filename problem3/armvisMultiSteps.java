@@ -31,6 +31,7 @@ public class armvisMultiSteps extends JPanel {
 	private double[] currCoords = {2.6,1.3,1.0};
 	private double[] currAngles = {-.635, 1.507, 1};
 	private double[] desiredCoords = {-1.4,1.6,-2.0};
+	private double[] desiredAngles = {-2.5, -.5, -2.1};
 	//private double[] finalPos = [2.6, 1.3, 1.0];
 	private double kp = .05;
 	private double[][] locations = {{-1.4,1.6,-2.0}, {-1.6, 3, -.7}, {1,1,0}};
@@ -102,7 +103,7 @@ public class armvisMultiSteps extends JPanel {
 		
 		moveOnToNextCoord = 2;
 		for (int i=0;i<2;i++) {
-			if (Math.abs(currCoords[i] - desiredCoords[i]) < .0001) {
+			if (Math.abs(currCoords[i] - desiredCoords[i]) < .001) {
 				moveOnToNextCoord = moveOnToNextCoord - 1;
 			}
 		}
@@ -117,11 +118,15 @@ public class armvisMultiSteps extends JPanel {
 			}
 			currentLocation = currentLocation += 1;
 			if(currentLocation < locations.length) {
-				desiredCoords = locations[currentLocation];
+				desiredAngles = locations[currentLocation];
+				double[] xy = toXYCoords(desiredAngles[0], desiredAngles[1], desiredAngles[2]);
+				desiredCoords[0] = xy[0];
+				desiredCoords[1] =xy[1];
+				desiredCoords[2] = desiredAngles[2];
 			 } 
 		}
 
-		double[][] ij = ij(desiredCoords);
+		double[][] ij = ij(desiredAngles);
 		for (int i=0;i<3;i++) {
 			double x = 0;
 			for (int j=0;j<3;j++) {
@@ -202,7 +207,12 @@ public class armvisMultiSteps extends JPanel {
 			return ij;
 	}
 	
-
+	public double[] toXYCoords(double thetaOne, double thetaTwo, double thetaThree) {
+		double[] coord = {300,300};
+		coord[0] = 100 * Math.cos(thetaOne) + 100 * Math.cos(thetaOne + thetaTwo) + 50 * Math.cos(thetaOne + thetaTwo + thetaThree) + 300;
+		coord[1] = 100 * Math.sin(thetaOne) + 100 * Math.sin(thetaOne + thetaTwo) + 50 * Math.sin(thetaOne + thetaTwo + thetaThree) + 300;
+		return coord;
+	}
 	
 
 }

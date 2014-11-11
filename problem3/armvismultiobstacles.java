@@ -29,13 +29,14 @@ public class armvismultiobstacles extends JPanel {
 	private double[] currCoords = {1.09,2.8,1.0};
 	private double[] currAngles = {.14, 1.45, 1.0};
 	private double[] desiredCoords = {1.09,2.8,1.0};
+	private double[] desiredAngles = {-2.5, -.5, -2.1};
 	double[] fieldPotential = {0,0,0};
 	double[] fieldx = {0,0,0};
 	double[] fieldy = {0,0,0};
 	double[] angleFromObstacle = {0,0,0};
 	//private double[] finalPos = [2.6, 1.3, 1.0];
 	private double kp = .05;
-		private double[][] locations = {{-3.2, -.55, -2.1}};
+		private double[][] locations = {{-2.5, -.5, -2.1}};
 	private int currentLocation = 0;
 	int moveOnToNextCoord = 2;
 	private double[][] obstacles = {{450, 550, 320, 370}, {145, 195, 310, 360}, {140, 390, 185, 285}};
@@ -141,7 +142,11 @@ public class armvismultiobstacles extends JPanel {
 			}
 			currentLocation = currentLocation += 1;
 			if(currentLocation < locations.length) {
-				desiredCoords = locations[currentLocation];
+				desiredAngles = locations[currentLocation];
+				double[] xy = toXYCoords(desiredAngles[0], desiredAngles[1], desiredAngles[2]);
+				desiredCoords[0] = xy[0];
+				desiredCoords[1] =xy[1];
+				desiredCoords[2] = desiredAngles[2];
 			 } 
 		}
 		
@@ -232,7 +237,7 @@ public class armvismultiobstacles extends JPanel {
 				int z = 0;
 				if (fieldPotentialMulti[i][j] == 0) {
 					z=1;
-				} else if (fieldPotentialMulti[i][j] < 20) {
+				} else if (fieldPotentialMulti[i][j] < 30) {
 					z=2;
 				}
 				
@@ -243,8 +248,8 @@ public class armvismultiobstacles extends JPanel {
 					case 0:		fieldx[i] = fieldx[i];
 								fieldy[i] = fieldy[i];
 								break;
-					case 2:		fieldx[i] = fieldx[i] + -.1 * ((20 - fieldPotentialMulti[i][j])*Math.cos(distToGoal)) + .1*(20-fieldPotentialMulti[i][j]) * Math.cos(angleFromObstacle[j]);
-								fieldy[i] = fieldy[i] + -.1 * ((20 - fieldPotentialMulti[i][j])*Math.sin(distToGoal)) + .1*(20-fieldPotentialMulti[i][j]) * Math.sin(angleFromObstacle[j]);
+					case 2:		fieldx[i] = fieldx[i]  -.1 * ((30 - fieldPotentialMulti[i][j])*Math.cos(distToGoal)) - .1*(30-fieldPotentialMulti[i][j]) * Math.cos(angleFromObstacle[j]);
+								fieldy[i] = fieldy[i]  -.1 * ((30 - fieldPotentialMulti[i][j])*Math.sin(distToGoal)) - .1*(30-fieldPotentialMulti[i][j]) * Math.sin(angleFromObstacle[j]);
 								break;
 				
 				}
@@ -256,7 +261,7 @@ public class armvismultiobstacles extends JPanel {
 		System.out.println(" for 2: x: " + fieldx[2] + ", y: " + fieldy[2]);
 		System.out.println("======================================================");
 		
-		double[][] ij = ij(desiredCoords);
+		double[][] ij = ij(desiredAngles);
 		for (int i=0;i<3;i++) {
 			double x = 0;
 			for (int j=0;j<3;j++) {
@@ -339,7 +344,12 @@ public class armvismultiobstacles extends JPanel {
 			return ij;
 	}
 	
-	
+	public double[] toXYCoords(double thetaOne, double thetaTwo, double thetaThree) {
+		double[] coord = {300,300};
+		coord[0] = 100 * Math.cos(thetaOne) + 100 * Math.cos(thetaOne + thetaTwo) + 50 * Math.cos(thetaOne + thetaTwo + thetaThree) + 300;
+		coord[1] = 100 * Math.sin(thetaOne) + 100 * Math.sin(thetaOne + thetaTwo) + 50 * Math.sin(thetaOne + thetaTwo + thetaThree) + 300;
+		return coord;
+	}
 
 	
 

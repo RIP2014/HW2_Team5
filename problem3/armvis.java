@@ -29,6 +29,7 @@ public class armvis extends JPanel {
 	private double[] currCoords = {2.6,1.3,1.0};
 	private double[] currAngles = {-.635, 1.507, 1};
 	private double[] desiredCoords = {-1.4,1.6,-2.0};
+	private double[] desiredAngles = {1.37,2.5,-2.0};
 	//private double[] finalPos = [2.6, 1.3, 1.0];
 	private double kp = .05;
 	
@@ -93,7 +94,8 @@ public class armvis extends JPanel {
 	
 	public void run() {
 		while (true) {
-		double[][] ij = ij(desiredCoords);
+		System.out.println(currAngles[0] + ", " + currAngles[1] + ", " + currAngles[2]);
+		double[][] ij = ij(desiredAngles);
 		for (int i=0;i<3;i++) {
 			double x = 0;
 			for (int j=0;j<3;j++) {
@@ -111,7 +113,7 @@ public class armvis extends JPanel {
 		currCoords[1] = (300 - a3y2) / 50;
 		currCoords[2] = a3theta;
 		try {
-			Thread.sleep(20);
+			Thread.sleep(200);
 		}
 		catch (InterruptedException e) {
 			
