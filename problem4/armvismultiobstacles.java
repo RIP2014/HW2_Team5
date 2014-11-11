@@ -342,12 +342,50 @@ public class armvismultiobstacles extends JPanel {
 			return ij;
 	}
 	
+	//Origin must have its parent set as itself!!!
 	private class RRT {
 		private Node origin;
 		public RRT(Node o) {
 			origin = o;
-			
+			int count = 0;
+			while (count < 10000) {
+				Node p = new Node(Math.random()*500+50, Math.random()*500+50);
+				holder np = findClose(p, o);
+				if (np.mid == null) {
+					np.old.addChild(np.rand);
+				} else {
+					np.old.replaceChild(np.mid, np.young);
+					np.young.parent = np.mid;
+					np.mid.addChild(np.rand);
+				}
+			}
 		}
+		private holder findClose(Node p, Node o) {
+			holder ans = null;
+			for (int i = 0; i < 3; i++) {
+				if(o.children[i] != null) {
+					holder pnp = findClose(p, o.children[i]);
+					if (ans == null ) {
+						ans = pnp;
+					} else {
+						if (pnp.dist < ans.dist) {
+							ans = pnp;
+						}
+					}
+				}
+				holder pnp = dist(p, o, o.parent);
+				if (ans == null) {
+					ans = pnp;
+				} else {
+					if (ans.dist < pnp.dist) {
+						ans = pnp;
+					}
+				}
+			}
+			return ans;
+		}
+		
+		
 	}
 	
 	double sqr(double x) { return x*x; }
@@ -357,20 +395,26 @@ public class armvismultiobstacles extends JPanel {
 		double l1 = dist2(v,w);
 		if (l1 == 0) {
 			d = Math.sqrt(dist2(p,v));
-			return new holder(null, d);
+			return new holder(null, d, v, w, p);
 		}
 		double t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l1;
 		Node temp = new Node(v.x + t * (w.x - v.y), v.y + t * (w.x - v.y));
 		d = Math.sqrt(dist2(p,temp));
-		return new holder(temp, d);
+		return new holder(temp, d, v, w, p);
 	}
 	
 	private class holder {
-		public Node point;
+		public Node mid;
 		public double dist;
-		public holder(Node p, double d) {
-			point = p;
+		public Node old;
+		public Node young;
+		public Node rand;
+		public holder(Node p, double d, Node A, Node B, Node rand) {
+			mid = p;
 			dist = d;
+			young = A;
+			old = B;
+			this.rand = rand;
 		}
 	}
 	
