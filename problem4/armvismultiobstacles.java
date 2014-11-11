@@ -41,14 +41,15 @@ public class armvismultiobstacles extends JPanel {
 	int moveOnToNextCoord = 2;
 	private double[][] obstacles = {{450, 550, 320, 370}, {145, 195, 310, 360}, {140, 150, 185, 195}};
 	private double[][] fieldPotentialMulti = {{0,0,0}, {0,0,0}, {0,0,0}};
-	
+	public RRT theTree;
 	public armvismultiobstacles() {
 		
 	}
 	
-	public void paintComponent (Graphics g) {
+	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		g.setColor(Color.LIGHT_GRAY);
+		//draw guides
 		g.drawLine(50, 0, 50, 599);
 		g.drawLine(100, 0, 100, 599);
 		g.drawLine(150, 0, 150, 599);
@@ -71,45 +72,36 @@ public class armvismultiobstacles extends JPanel {
 		g.drawLine(0, 450, 599, 450);
 		g.drawLine(0, 500, 599, 500);
 		g.drawLine(0, 550, 599, 550);
-		
-		g.setColor(Color.BLACK);
-		//g.fillRect(5,5, (int) (armOneLength * lengthConversion), (int) width);
-		g.drawLine((int) a1x1, (int) a1y1, (int) a1x2, (int) a1y2);
-		g.drawLine((int) a2x1, (int) a2y1, (int) a2x2, (int) a2y2);
-		g.drawLine((int) a3x1, (int) a3y1, (int) a3x2, (int) a3y2);
+		//draw origin point
 		g.setColor(Color.RED);
-		g.fillOval((int) a1x1 - 4, (int) a1y1 - 4, 8, 8);
-		g.setColor(Color.YELLOW);
-		g.fillOval((int) a2x1 - 4, (int) a2y1 - 4, 8, 8);
-		g.fillOval((int) a3x1 - 4, (int) a3y1 - 4, 8, 8);
-		g.fillOval((int) a3x2 - 4, (int) a3y2 - 4, 8, 8);
-		g.setColor(Color.GREEN);
-		g.fillOval(230-4, 220-4, 8, 8);
-		g.fillOval(430-4, 235-4, 8, 8);
-		//Draw rectangle centers
+		
+		//draw goal point
 		g.setColor(Color.BLUE);
-		g.fillOval((((int)obstacles[0][0] + (int)obstacles[0][1])/2)-4, (((int)obstacles[0][2] + (int)obstacles[0][3])/2)-4, 8, 8);
-		g.fillOval((((int)obstacles[1][0] + (int)obstacles[1][1])/2)-4, (((int)obstacles[1][2] + (int)obstacles[1][3])/2)-4, 8, 8);
-		g.fillOval((((int)obstacles[2][0] + (int)obstacles[2][1])/2)-4, (((int)obstacles[2][2] + (int)obstacles[2][3])/2)-4, 8, 8);
-		//Draw rectangle outlines
+		
+		//draw each vertex
+		g.setColor(Color.GREEN);
+		for (int i=0;i<this.theTree.vertexList.length;i++) {
+			if (this.theTree.vertexList[i] != null) {
+				drawVertex((int)this.theTree.vertexList[i].x,(int)this.theTree.vertexList[i].y, g);
+			}
+		}
+		
+		//draw each edge
 		g.setColor(Color.BLACK);
-		g.drawLine((int)obstacles[0][1],(int)obstacles[0][2],(int)obstacles[0][1],(int)obstacles[0][3]);
-		g.drawLine((int)obstacles[0][1],(int)obstacles[0][2],(int)obstacles[0][0],(int)obstacles[0][2]);
-		g.drawLine((int)obstacles[0][0],(int)obstacles[0][2],(int)obstacles[0][0],(int)obstacles[0][3]);
-		g.drawLine((int)obstacles[0][0],(int)obstacles[0][3],(int)obstacles[0][1],(int)obstacles[0][3]);
+		for (int i=0;i<this.theTree.edgeList.length;i++) {
+			if (this.theTree.edgeList[i][0] != null){
+				drawEdge(this.theTree.edgeList[i][0].x, this.theTree.edgeList[i][1].x, this.theTree.edgeList[i][0].y, this.theTree.edgeList[i][1].y,g);
+			}
+		}
 		
-		//second rectangle at 1x1
-		g.drawLine((int)obstacles[1][1],(int)obstacles[1][2],(int)obstacles[1][1],(int)obstacles[1][3]);
-		g.drawLine((int)obstacles[1][1],(int)obstacles[1][2],(int)obstacles[1][0],(int)obstacles[1][2]);
-		g.drawLine((int)obstacles[1][0],(int)obstacles[1][2],(int)obstacles[1][0],(int)obstacles[1][3]);
-		g.drawLine((int)obstacles[1][0],(int)obstacles[1][3],(int)obstacles[1][1],(int)obstacles[1][3]);
-		
-		//third rectangle at 2x5
-		g.drawLine((int)obstacles[2][1],(int)obstacles[2][2],(int)obstacles[2][1],(int)obstacles[2][3]);
-		g.drawLine((int)obstacles[2][1],(int)obstacles[2][2],(int)obstacles[2][0],(int)obstacles[2][2]);
-		g.drawLine((int)obstacles[2][0],(int)obstacles[2][2],(int)obstacles[2][0],(int)obstacles[2][3]);
-		g.drawLine((int)obstacles[2][0],(int)obstacles[2][3],(int)obstacles[2][1],(int)obstacles[2][3]);
-		
+	}
+	
+	public void drawVertex(double x, double y, Graphics g) {
+		g.fillOval((int)x-2, (int)y-2, 4, 4);
+	}
+	
+	public void drawEdge(double x1, double x2, double y1, double y2, Graphics g) {
+		g.drawLine((int)x1,(int)y1,(int)x2,(int)y2);
 	}
 	
 	public static void main(String [] args) {
@@ -120,7 +112,15 @@ public class armvismultiobstacles extends JPanel {
 		frame.getContentPane().add(vis, BorderLayout.CENTER);
 		frame.pack();
 		frame.setVisible(true);
-		vis.run();
+		vis.run2();
+		//vis.run();
+	}
+	
+	public void run2() {
+		Node o = new Node(250, 250);
+		o.parent = o;
+		this.theTree = new RRT(o, 10000);
+		repaint();
 	}
 	
 	public void run() {
@@ -345,21 +345,59 @@ public class armvismultiobstacles extends JPanel {
 	//Origin must have its parent set as itself!!!
 	private class RRT {
 		private Node origin;
-		public RRT(Node o) {
+		public Node[] vertexList;
+		public Node[][] edgeList;
+		public RRT(Node o, int iter) {
 			origin = o;
-			int count = 0;
-			while (count < 10000) {
+			int count = 1;
+			int eCount = 0;
+			vertexList = new Node[2*iter];
+			edgeList = new Node[4*iter][2];
+			vertexList[0] = o;
+			while (count < iter) {
 				Node p = new Node(Math.random()*500+50, Math.random()*500+50);
+				if (Math.sqrt((300-p.x)*(300-p.x)+(300-p.y)*(300-p.y)) > 250) {
+					continue;
+				}
 				holder np = findClose(p, o);
-				if (np.mid == null) {
+				if (np.mid == null && np.marker == 0) {
+					np.young.addChild(np.rand);
+					np.rand.parent = np.young;
+					vertexList[count] = np.rand;
+					edgeList[eCount][0] = np.rand.parent;
+					edgeList[eCount][1] = np.rand;
+					eCount++;
+				} else if(np.mid == null && np.marker == 1) {
 					np.old.addChild(np.rand);
+					np.rand.parent = np.old;
+					vertexList[count] = np.rand;
+					edgeList[eCount][0] = np.rand.parent;
+					edgeList[eCount][1] = np.rand;
+					eCount++;
 				} else {
 					np.old.replaceChild(np.mid, np.young);
 					np.young.parent = np.mid;
 					np.mid.addChild(np.rand);
+					np.mid.addChild(np.young);
+					np.mid.parent = np.old;
+					np.rand.parent = np.mid;
+					vertexList[count] = np.rand;
+					edgeList[eCount][0] = np.rand.parent;
+					edgeList[eCount][1] = np.rand;
+					eCount++;
+					edgeList[eCount][0] = np.young.parent;
+					edgeList[eCount][1] = np.young;
+					eCount++;
+					vertexList[count+1] = np.mid;
+					count++;
+					//vertexList[count+2] = np.mid;
+					//count++;
 				}
+				repaint();
+				count++;
 			}
 		}
+		
 		private holder findClose(Node p, Node o) {
 			holder ans = null;
 			for (int i = 0; i < 3; i++) {
@@ -373,22 +411,22 @@ public class armvismultiobstacles extends JPanel {
 						}
 					}
 				}
-				holder pnp = dist(p, o, o.parent);
-				if (ans == null) {
+				
+			}
+			holder pnp = distP2S(p, o, o.parent);
+			if (ans == null) {
+				ans = pnp;
+			} else {
+				if (pnp.dist < ans.dist) {
 					ans = pnp;
-				} else {
-					if (ans.dist < pnp.dist) {
-						ans = pnp;
-					}
 				}
 			}
 			return ans;
 		}
 		
-		
 	}
 	
-	double sqr(double x) { return x*x; }
+	/*double sqr(double x) { return x*x; }
 	double dist2(Node v, Node w) { return sqr(v.x - w.x) + sqr(v.y - w.y); }
 	holder dist(Node p, Node v, Node w) {
 		double d = 0;
@@ -401,6 +439,38 @@ public class armvismultiobstacles extends JPanel {
 		Node temp = new Node(v.x + t * (w.x - v.y), v.y + t * (w.x - v.y));
 		d = Math.sqrt(dist2(p,temp));
 		return new holder(temp, d, v, w, p);
+	}*/
+	
+	private holder distP2S(Node P, Node A, Node B) {
+		vec v = new vec(B, A);
+		vec w = new vec(P, A);
+		
+		double c1 = dotP(w,v);
+		if (c1 <= 0) {
+			return new holder(null, Math.sqrt(((w.x)*(w.x))+((w.y)*(w.y))), A, B, P, 0);
+		}
+		double c2 = dotP(v,v);
+		vec h = new vec(P, B);
+		if (c2 <= c1) {
+			return new holder(null, Math.sqrt(((h.x)*(h.x))+((h.y)*(h.y))), A, B, P, 1);
+		}
+		double b = c1/c2;
+		Node Pb = new Node(A.x+b*(v.x), A.y+b*(v.y));
+		h = new vec(P, Pb);
+		return new holder(Pb, Math.sqrt(((h.x)*(h.x))+((h.y)*(h.y))), A, B, P, 2);
+	}
+	
+	private class vec {
+		public double x;
+		public double y;
+		public vec (Node b, Node a) {
+			x = b.x - a.x;
+			y = b.y - a.y;
+		}
+	}
+	
+	private double dotP(vec A, vec B){
+		return (A.x * B.x + A.y * B.y);
 	}
 	
 	private class holder {
@@ -409,16 +479,18 @@ public class armvismultiobstacles extends JPanel {
 		public Node old;
 		public Node young;
 		public Node rand;
-		public holder(Node p, double d, Node A, Node B, Node rand) {
+		public int marker;
+		public holder(Node p, double d, Node A, Node B, Node rand, int n) {
 			mid = p;
 			dist = d;
 			young = A;
 			old = B;
 			this.rand = rand;
+			marker = n;
 		}
 	}
 	
-	private class Node {
+	public class Node {
 		public double x;
 		public double y;
 		private Node parent = null;
