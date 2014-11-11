@@ -17,6 +17,11 @@ class Bug(object):
         self.distance_traveled = 0
         self.visited_points = []
         self.state = None
+        self.euclidean_distance = self.position.distance_to(self.goal)
+
+    def competitive_ratio(self):
+
+        return self.distance_traveled / self.euclidean_distance
 
     def at_goal(self):
 

@@ -55,6 +55,7 @@ class BugOne(Bug):
                 self.visited_points.append(Point(self.position.x, self.position.y))
                 self.position.x += self.direction.x
                 self.position.y += self.direction.y
+                self.distance_traveled += 1
 
 
         elif not self.on_obstacle():
@@ -63,6 +64,7 @@ class BugOne(Bug):
             self.position.x += self.direction.x
             self.position.y += self.direction.y
             self.updateHeading()
+            self.distance_traveled += 1
             self.state = State.Motion
             print "not on obstacle!"
 
@@ -79,6 +81,7 @@ class BugOne(Bug):
                 self.circumnavigation_closest_point = Point(self.position.x, self.position.y)
                 self.position.x += 2 * self.direction.x
                 self.position.y += 2 * self.direction.y
+                self.distance_traveled += 1
                 self.state = State.Circumnavigation
 
     def _circumnavigate_obstacle(self, obstacle, goal):

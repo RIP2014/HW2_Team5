@@ -100,4 +100,5 @@ while not bug.at_goal():
     sleep(.01)
     pygame.display.update()
 
-            
+print "******* Competitive Ratio ********"
+print bug.competitive_ratio()
