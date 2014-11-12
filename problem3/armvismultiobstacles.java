@@ -35,8 +35,13 @@ public class armvismultiobstacles extends JPanel {
 	double[] fieldy = {0,0,0};
 	double[] angleFromObstacle = {0,0,0};
 	//private double[] finalPos = [2.6, 1.3, 1.0];
+<<<<<<< Updated upstream
 	private double kp = .05;
 		private double[][] locations = {{-2.5, -.5, -2.1}};
+=======
+	private double kp = .005;
+		private double[][] locations = {{-3.2, -.55, -2.1}};
+>>>>>>> Stashed changes
 	private int currentLocation = 0;
 	int moveOnToNextCoord = 2;
 	private double[][] obstacles = {{450, 550, 320, 370}, {145, 195, 310, 360}, {140, 390, 185, 285}};
@@ -135,7 +140,7 @@ public class armvismultiobstacles extends JPanel {
 			System.out.println("x: " + currCoords[0] + ", y: " + currCoords[1] + ", theta: " + currCoords[2]);
 			System.out.println("x: " + desiredCoords[0] + ", y: " + desiredCoords[1] + ", theta: " + desiredCoords[2]);
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(10);
 			}
 			catch (InterruptedException e) {
 			

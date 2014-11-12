@@ -4,6 +4,8 @@ import javax.swing.*;
 
 import java.util.concurrent.*;
 
+import java.awt.geom.Line2D;
+
 public class armvismultiobstacles extends JPanel {
 	private float armOneLength = 100;
 	private float armTwoLength = 100;
@@ -141,7 +143,7 @@ public class armvismultiobstacles extends JPanel {
 			System.out.println("Current Coords: x: " + currCoords[0] + ", y: " + currCoords[1] + ", theta: " + currCoords[2]);
 			System.out.println("Desired Coords: x: " + desiredCoords[0] + ", y: " + desiredCoords[1] + ", theta: " + desiredCoords[2]);
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(10);
 			}
 			catch (InterruptedException e) {
 			
@@ -363,40 +365,56 @@ public class armvismultiobstacles extends JPanel {
 				if (Math.sqrt((300-p.x)*(300-p.x)+(300-p.y)*(300-p.y)) > 250) {
 					continue;
 				}
-				holder np = findClose(p, o);
-				if (np.mid == null && np.marker == 0) {
-					np.young.addChild(np.rand);
-					np.rand.parent = np.young;
-					vertexList[count] = np.rand;
-					edgeList[eCount][0] = np.rand.parent;
-					edgeList[eCount][1] = np.rand;
-					eCount++;
-				} else if(np.mid == null && np.marker == 1) {
-					np.old.addChild(np.rand);
-					np.rand.parent = np.old;
-					vertexList[count] = np.rand;
-					edgeList[eCount][0] = np.rand.parent;
-					edgeList[eCount][1] = np.rand;
-					eCount++;
-				} else {
-					np.old.replaceChild(np.mid, np.young);
-					np.young.parent = np.mid;
-					np.mid.addChild(np.rand);
-					np.mid.addChild(np.young);
-					np.mid.parent = np.old;
-					np.rand.parent = np.mid;
-					vertexList[count] = np.rand;
-					edgeList[eCount][0] = np.rand.parent;
-					edgeList[eCount][1] = np.rand;
-					eCount++;
-					edgeList[eCount][0] = np.young.parent;
-					edgeList[eCount][1] = np.young;
-					eCount++;
-					vertexList[count+1] = np.mid;
-					count++;
-					//vertexList[count+2] = np.mid;
-					//count++;
+				//need list of all obstacles and check to see if the point is inside if so dont continue
+				
+				boolean b = true;
+				for (int i=0;i<obstacles.length;i++) {
+					double[] curr = obstacles[i];
+					Rectangle.Double r1 = new Rectangle.Double(curr[0], curr[2], curr[2], curr[3]);
+					Line2D l1 = new Line2D.Double(o.x, p.x, o.y, p.y);
+					if(l1.intersects(r1)){
+						b = false;
+					}
 				}
+
+				if(b){
+				
+					holder np = findClose(p, o);
+					if (np.mid == null && np.marker == 0) {
+						np.young.addChild(np.rand);
+						np.rand.parent = np.young;
+						vertexList[count] = np.rand;
+						edgeList[eCount][0] = np.rand.parent;
+						edgeList[eCount][1] = np.rand;
+						eCount++;
+					} else if(np.mid == null && np.marker == 1) {
+						np.old.addChild(np.rand);
+						np.rand.parent = np.old;
+						vertexList[count] = np.rand;
+						edgeList[eCount][0] = np.rand.parent;
+						edgeList[eCount][1] = np.rand;
+						eCount++;
+					} else {
+						np.old.replaceChild(np.mid, np.young);
+						np.young.parent = np.mid;
+						np.mid.addChild(np.rand);
+						np.mid.addChild(np.young);
+						np.mid.parent = np.old;
+						np.rand.parent = np.mid;
+						vertexList[count] = np.rand;
+						edgeList[eCount][0] = np.rand.parent;
+						edgeList[eCount][1] = np.rand;
+						eCount++;
+						edgeList[eCount][0] = np.young.parent;
+						edgeList[eCount][1] = np.young;
+						eCount++;
+						vertexList[count+1] = np.mid;
+						count++;
+						//vertexList[count+2] = np.mid;
+						//count++;
+					}
+				}
+				
 				repaint();
 				count++;
 			}
