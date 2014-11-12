@@ -4,7 +4,7 @@ import Jama.*;
 
 
 public class rrtconstrain extends JPanel {
-	//the x and y values of each vertex in the tree. Also holds the parent vertex in each node.
+	//the theta1, theta2, theta3 in the tree. Also holds the parent vertex in each node.
 	// {x,y} {parentx, parenty}
 	private double[][] treeVertices = new double[300][6];
 	//the pair x-y values of each two vertices connected by an edge.
@@ -83,25 +83,38 @@ public class rrtconstrain extends JPanel {
 	
 	public void run() {
 
-		double[] firstVertex = {1.5707,1.2708,0,1.5707,1.2708,0};
+		double[] firstVertex = {1.5707, -1.2708,0,1.5707, -1.2708,0};
 		treeVertices[0] = firstVertex;
 		int j = 1;
-		while (true) {
+		double[] goalVertex = {1.5707, 1.2708, 0};
+		boolean goalLocated = false;
+		while (!goalLocated) {
 			//while the tree has not expanded to the endpoint, build the tree
-			boolean goalLocated = false;
+			
 			
 			while (j < 300) {
 				//build the tree:
 				//Step 1: sample random node
-				double newThetaOne = Math.random() * 2 * Math.PI;
-				double newThetaTwo = Math.random() * 2 * Math.PI;
-				double newThetaThree = Math.random() * 2 * Math.PI;
+				double newThetaOne = Math.random() * 2 * Math.PI - Math.PI;
+				double newThetaTwo = Math.random() * 2 * Math.PI -  Math.PI;
+				double newThetaThree = Math.random() * 2 * Math.PI - Math.PI;
 				
 				double[] coords = getXYValues(newThetaOne, newThetaTwo, newThetaThree);
 				double newX = coords[0];
 				double newY = coords[1];
 				//Step 2: find closest neighbor to that node
 				double[] parentNode = nearestNeighbor(newThetaOne, newThetaTwo, newThetaThree, j);
+				
+				
+				double[] parentNodeAsVertices = getXYValues(parentNode[0], parentNode[1], parentNode[2]);
+				double dirVectorOne = (newThetaOne - parentNode[0]);
+				double dirVectorTwo = (newThetaTwo - parentNode[1]);
+				double dirVectorThree = (newThetaThree - parentNode[2]);
+				double sumSq = Math.sqrt(Math.pow(dirVectorOne,2) + Math.pow(dirVectorTwo,2) + Math.pow(dirVectorThree,2));
+	
+				newOne = parentNode[0] + dirVectorOne * deltaT/sumSq;
+				newTwo = parentNode[1] + dirVectorTwo * deltaT/sumSq;
+				newThree = parentNode[2] + dirVectorThree * deltaT/sumSq;
 				
 				//step 3
 				double error = Math.abs(newY - 3);
@@ -117,15 +130,6 @@ public class rrtconstrain extends JPanel {
 				Matrix a = new Matrix(j(newThetaOne,newThetaTwo,newThetaThree));
 				Matrix velocity = a.inverse().times(endEffector);		
 				
-				double[] parentNodeAsVertices = getXYValues(parentNode[0], parentNode[1], parentNode[2]);
-				double dirVectorOne = (newThetaOne - parentNode[0]);
-				double dirVectorTwo = (newThetaTwo - parentNode[1]);
-				double dirVectorThree = (newThetaThree - parentNode[2]);
-				double sumSq = Math.sqrt(Math.pow(dirVectorOne,2) + Math.pow(dirVectorTwo,2) + Math.pow(dirVectorThree,2));
-	
-				newOne = parentNode[0] + dirVectorOne * deltaT/sumSq;
-				newTwo = parentNode[1] + dirVectorTwo * deltaT/sumSq;
-				newThree = parentNode[2] + dirVectorThree * deltaT/sumSq;
 				
 				double[][] d = {{newOne},{newTwo},{newThree}};
 				Matrix newNode = new Matrix(d);
@@ -138,6 +142,9 @@ public class rrtconstrain extends JPanel {
 					treeVertices[j] = (newVertex);
 					treeAdjacencies[j] = (newVertex);
 
+				}
+				if (Math.sqrt(Math.pow(goalVertex[0] - newNode.get(0,0),2) + Math.pow(goalVertex[1] - newNode.get(1,0),2) + Math.pow(goalVertex[2] - newNode.get(2,0),2)) < 0.2) {
+					goalLocated = true;
 				}
 				
 				
