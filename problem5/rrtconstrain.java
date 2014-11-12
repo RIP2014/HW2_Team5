@@ -1,6 +1,7 @@
 import java.awt.*;
 import javax.swing.*;
 import Jama.*;
+import java.util.Arrays;
 
 
 public class rrtconstrain extends JPanel {
@@ -14,7 +15,7 @@ public class rrtconstrain extends JPanel {
 	private double newOne;
 	private double newTwo;
 	private double newThree;
-	
+	int lastcounter = 1;
 	public rrtconstrain() {
 	
 	}
@@ -47,25 +48,52 @@ public class rrtconstrain extends JPanel {
 		g.drawLine(0, 500, 599, 500);
 		g.drawLine(0, 550, 599, 550);
 		//draw origin point
+		//  
 		g.setColor(Color.RED);
-		
+		double[] asVertex = getXYValues(treeVertices[0][0], treeVertices[0][1], treeVertices[0][2]);
+
+			drawVertex(asVertex[0]*50 + 250, asVertex[1]*50 + 250, g);
 		//draw goal point
 		g.setColor(Color.BLUE);
-		
+		asVertex = getXYValues(1.5707, 1.2708, 0);
+			drawVertex(asVertex[0]*50 + 250, asVertex[1]*50 + 250, g);
 		//draw each vertex
-		g.setColor(Color.GREEN);
+		double[] pre2;
+		double[] pre3;
+		double[] pre4;
 		for (int i=0;i<treeVertices.length;i++) {
-			double[] asVertex = getXYValues(treeVertices[i][0], treeVertices[i][1], treeVertices[i][2]);
-			drawVertex(asVertex[0], asVertex[1], g);
-		}
+			if (i == 0) {continue;}
+			int waste = 0;
+			while (waste < 2000000000) { waste++;}
+			waste = 0;
+			while (waste < 2000000000) { waste++;}
+			waste = 0;
+			while (waste < 2000000000) { waste++;}
+			waste = 0;
+			while (waste < 2000000000) { waste++;}
+			g.setColor(Color.GREEN);
+			double[] asVertexs = getXYValues(treeVertices[i][0], treeVertices[i][1], treeVertices[i][2]);
+			pre2 = asVertexs;
+			drawVertex(asVertexs[0]*50 + 250, asVertexs[1]*50 + 250, g);
+			waste = 0;
+		// 	while (waste < 2000000000) { waste++;}
+			g.setColor(Color.YELLOW);
+			double[] asVertexs1 = getXYValues1(treeVertices[i][0], treeVertices[i][1], treeVertices[i][2]);
+			pre3 = asVertexs1;
+			drawVertex(asVertexs1[0]*50 + 250, asVertexs1[1]*50 + 250, g);
+		// 	waste = 0;
+		// 	while (waste < 2000000000) { waste++;}
+			g.setColor(Color.RED);
+			double[] asVertexs22 = getXYValues2(treeVertices[i][0], treeVertices[i][1], treeVertices[i][2]);
+			pre4 = asVertexs22;
+			drawVertex(asVertexs22[0]*50 + 250, asVertexs22[1]*50 + 250, g);
 		
-		//draw each edge
-		g.setColor(Color.BLACK);
-		for (int i=0;i<treeAdjacencies.length;i++) {
-			double[] asVertexOne = getXYValues(treeAdjacencies[i][0], treeAdjacencies[i][1], treeAdjacencies[i][2]);
-			double[] asVertexTwo = getXYValues(treeAdjacencies[i][3], treeAdjacencies[i][4], treeAdjacencies[i][5]);
-			drawEdge(asVertexOne[0], asVertexOne[1], asVertexTwo[0], asVertexTwo[1],g);
+
 		}
+
+
+		
+
 		
 	}
 	
@@ -87,22 +115,14 @@ public class rrtconstrain extends JPanel {
 		treeVertices[0] = firstVertex;
 		int j = 1;
 		double[] goalVertex = {1.5707, 1.2708, 0};
-		boolean goalLocated = false;
-		while (!goalLocated) {
+		double[] goalCoords = getXYValues(goalVertex[0], goalVertex[1], goalVertex[2]);
+		while (true) {
 			//while the tree has not expanded to the endpoint, build the tree
-			
-			
-			while (j < 300) {
-				//build the tree:
-				//Step 1: sample random node
-				double newThetaOne = Math.random() * 2 * Math.PI - Math.PI;
+			double newThetaOne = Math.random() * 2 * Math.PI - Math.PI;
 				double newThetaTwo = Math.random() * 2 * Math.PI -  Math.PI;
 				double newThetaThree = Math.random() * 2 * Math.PI - Math.PI;
 				
-				double[] coords = getXYValues(newThetaOne, newThetaTwo, newThetaThree);
-				double newX = coords[0];
-				double newY = coords[1];
-				//Step 2: find closest neighbor to that node
+								//Step 2: find closest neighbor to that node
 				double[] parentNode = nearestNeighbor(newThetaOne, newThetaTwo, newThetaThree, j);
 				
 				
@@ -117,8 +137,26 @@ public class rrtconstrain extends JPanel {
 				newThree = parentNode[2] + dirVectorThree * deltaT/sumSq;
 				
 				//step 3
-				double error = Math.abs(newY - 3);
+				double[] coords = getXYValues(newOne, newTwo, newThree);
+				double newX = coords[0];
+				double newY = coords[1];
+				double [] tempCoords = {newOne, newTwo, newThree};
+
+				double error = Math.abs(newY - 3);		
+			int k = 0;	
+			while (k < 1000) {
+				//build the tree:
+				//Step 1: sample random node
+				k = k+1;
 				
+				if (error < 0.0005) { break;}
+				coords = getXYValues(newOne, newTwo, newThree);
+				newX = coords[0];
+				newY = coords[1];
+				error = Math.abs(newY - 3);
+				//System.out.println(error);
+
+
 				double dx = 0;
 				double dy = error*deltaT;
 				double dtheta = 0;
@@ -127,7 +165,7 @@ public class rrtconstrain extends JPanel {
 				
 				Matrix endEffector = new Matrix(vals);
 				
-				Matrix a = new Matrix(j(newThetaOne,newThetaTwo,newThetaThree));
+				Matrix a = new Matrix(j(newOne,newTwo,newThree));
 				Matrix velocity = a.inverse().times(endEffector);		
 				
 				
@@ -135,51 +173,33 @@ public class rrtconstrain extends JPanel {
 				Matrix newNode = new Matrix(d);
 	
 				newNode = newNode.minus(velocity);
-				
-				if(Math.abs(newNode.get(1,0) - 3) < 3){
-					j = j+1;
-					double[] newVertex = {newNode.get(0,0), newNode.get(1,0), newNode.get(2,0), parentNode[0], parentNode[1], parentNode[2]};
-					treeVertices[j] = (newVertex);
-					treeAdjacencies[j] = (newVertex);
+				newOne = newNode.get(0,0);
+				newTwo = newNode.get(1,0);
+				newThree = newNode.get(2,0);
+			}	
+				if(Math.abs(error) < 3){
+					
+					if (lastcounter == 299) {break;}
+					//System.out.println("J");
+					double[] newVertex = {newOne, newTwo, newThree, parentNode[0], parentNode[1], parentNode[2]};
+					treeVertices[j] = newVertex;
+					treeAdjacencies[j] = newVertex;
+					j++;
+					lastcounter++;
+					repaint();
 
 				}
-				if (Math.sqrt(Math.pow(goalVertex[0] - newNode.get(0,0),2) + Math.pow(goalVertex[1] - newNode.get(1,0),2) + Math.pow(goalVertex[2] - newNode.get(2,0),2)) < 0.2) {
-					goalLocated = true;
+				double[] newNodecoords =  getXYValues(newOne, newTwo, newThree);
+				if (Math.sqrt(Math.pow(goalCoords[0] - newNodecoords[0], 2) + Math.pow(goalCoords[1] - newNodecoords[1], 2) + Math.pow(1.5707+1.2708-(newOne + newTwo + newThree),2)) < 0.2) {
+					
+					break;
 				}
 				
-				
 			
 			
 			
+			//System.out.println(j);
 			
-			
-			
-			
-			/*
-			//Step 3: Calculate q(s) that is a set distance along the vertex between closest to random
-			double[] parentNodeAsVertices = getXYValues(parentNode[0], parentNode[1], parentNode[2]);
-			double dirVectorOne = (newThetaOne - parentNode[0]);
-			double dirVectorTwo = (newThetaTwo - parentNode[1]);
-			double dirVectorThree = (newThetaThree - parentNode[2]);
-			double sumSq = Math.sqrt(Math.pow(dirVectorOne,2) + Math.pow(dirVectorTwo,2) + Math.pow(dirVectorThree,2));
-
-			newOne = parentNode[0] + dirVectorOne * deltaT/sumSq;
-			newTwo = parentNode[1] + dirVectorTwo * deltaT/sumSq;
-			newThree = parentNode[2] + dirVectorThree * deltaT/sumSq;
-			
-			
-			//Step 4: Compute the error between pose of candidate node and workspace criteria
-			if (newConfig(newOne, newTwo, newThree, parentNode[0], parentNode[1], parentNode[2])) {
-				double[] newVertex = {newThetaOne, newThetaTwo, newThetaThree, parentNode[0], parentNode[1], parentNode[2]};
-				treeVertices[j] = (newVertex);
-				treeAdjacencies[j] = (newVertex);
-			}
-			//Step 5: Move node to goal node with jacobian control such that error is diminished
-			
-			//Step 6: add that new node to the tree
-*/
-			System.out.println(j);
-			}
 			
 		repaint();	
 		}
@@ -188,7 +208,7 @@ public class rrtconstrain extends JPanel {
 	*	Draws a vertex in the RRT
 	*/
 	public void drawVertex(double x, double y, Graphics g) {
-		g.fillOval((int)x-2, (int)y-2, 4, 4);
+		g.fillOval((int)x-2, (int)y-2, 7, 7);
 	}
 	/*
 	*	Draws an edge in the RRT
@@ -202,145 +222,67 @@ public class rrtconstrain extends JPanel {
 	*/
 	public double[] nearestNeighbor(double thetaOne, double thetaTwo, double thetaThree, double j) {
 		double[] xyNew = getXYValues(thetaOne, thetaTwo, thetaThree);
-		double currentThetaOne = 300;
+		double currentThetaOne  = 300;
 		double currentThetaTwo = 300;
 		double currentThetaThree = 300;
 		double currentMinDistance = 99999;
-		for (int i=0;i<j;i++) {
-			double[] xyTest = getXYValues(treeVertices[i][0], treeVertices[i][1], treeVertices[i][2]);
-			double testingMinDistance = Math.sqrt(Math.pow(xyNew[0] - xyTest[0],2) + Math.pow(xyNew[1] - xyTest[1],2));
+		/*for (int i=0;i<j;i++) {
+			if (null != treeVertices[i]){
+		*/
+		for (double[] i : treeVertices) {
+				
+			
+			double testingMinDistance = Math.sqrt(Math.pow(i[0] - thetaOne,2) + Math.pow(i[1] - thetaTwo,2) + Math.pow(i[2] - thetaOne,2));
 			if (testingMinDistance < currentMinDistance) {
 				currentMinDistance = testingMinDistance;
-				currentThetaOne = treeVertices[i][0];
-				currentThetaTwo = treeVertices[i][1];
-				currentThetaThree = treeVertices[i][2];
+				currentThetaOne = i[0];
+				currentThetaTwo = i[1];
+				currentThetaThree = i[2];
 			}
 		}
+		
 		double[] neighbor = {currentThetaOne, currentThetaTwo, currentThetaThree};
 		return neighbor;
 	}
-	//compute the task error
-	public double task_error(double thetaOne, double thetaTwo, double thetaThree) {
-		//retrieve constraint
-		double constraint = 0;
-		//forward kinematics
-		double[][] m1 = transformMatrix(thetaOne,100);
-		double[][] m2 = transformMatrix(thetaTwo,100);
-		double[][] m3 = transformMatrix(thetaThree,50);
-		double[][] fullTransform = matrixMultiply(m1, m2);
-		fullTransform = matrixMultiply(fullTransform, m3);
-		double error = fullTransform[1][0] + fullTransform[1][1] + fullTransform[1][2];
-		return error;
-	}
 	
-	public double[][] transformMatrix(double theta, double l) {
-		double[][] t = new double[4][4];
-		
-		t[0][0] = Math.cos(theta);
-		t[0][1] = -Math.sin(theta);
-		t[0][2] = 0;
-		t[0][3] = -l;
-		t[1][0] = Math.sin(theta);
-		t[1][1] = Math.cos(theta);
-		t[1][2] = 0;
-		t[1][3] = 0;
-		t[2][0] = 0;
-		t[2][1] = 0;
-		t[2][2] = 1;
-		t[2][3] = 0;
-		t[3][0] = 0;
-		t[3][1] = 0;
-		t[3][2] = 0;
-		t[3][3] = 1;
-		return t;
-	
-	}
-	
-	public double[][] matrixMultiply(double[][] m1, double[][] m2) {
-		double[][] m = new double[4][4];
-		for (int i=0;i<3;i++) {
-			for (int j=0;j<4;j++) {
-				m[i][j] = 0.0;
-			}
-		}
-		for (int i=0;i<4;i++) {
-			for (int j=0;j<4;j++) {
-				for (int k=0;k<4;k++) {
-					m[i][j] = m[i][j] + m1[i][k] + m2[k][j];
-				}
-			}
-		}
-		return m;
-	}
 	
 	//get the x y values of the end effector using forward kinematics
 	public double[] getXYValues(double thetaOne, double thetaTwo, double thetaThree) {
 		double[] coord = {300,300};
-		coord[0] = 100 * Math.cos(thetaOne) + 100 * Math.cos(thetaOne + thetaTwo) + 50 * Math.cos(thetaOne + thetaTwo + thetaThree) + 300;
-		coord[1] = 100 * Math.sin(thetaOne) + 100 * Math.sin(thetaOne + thetaTwo) + 50 * Math.sin(thetaOne + thetaTwo + thetaThree) + 300;
+		coord[0] = 2 * Math.cos(thetaOne) + 2 * Math.cos(thetaOne + thetaTwo) +  Math.cos(thetaOne + thetaTwo + thetaThree) ;
+		coord[1] = 2 * Math.sin(thetaOne) + 2 * Math.sin(thetaOne + thetaTwo) +  Math.sin(thetaOne + thetaTwo + thetaThree) ;
+		return coord;
+	}
+	public double[] getXYValues1(double thetaOne, double thetaTwo, double thetaThree) {
+		double[] coord = {300,300};
+		coord[0] = 2 * Math.cos(thetaOne) + 2 * Math.cos(thetaOne + thetaTwo) ;
+		coord[1] = 2 * Math.sin(thetaOne) + 2 * Math.sin(thetaOne + thetaTwo) ;
+		return coord;
+	}
+	public double[] getXYValues2(double thetaOne, double thetaTwo, double thetaThree) {
+		double[] coord = {300,300};
+		coord[0] = 2 * Math.cos(thetaOne) ;
+		coord[1] = 2 * Math.sin(thetaOne) ;
 		return coord;
 	}
 	
-	public boolean newConfig(double thetaOne, double thetaTwo, double thetaThree, double nearThetaOne, double nearThetaTwo, double nearThetaThree) {
-		
-		double e = task_error(thetaOne, thetaTwo, thetaThree);
-		double max_displacement = 5;
-		while (Math.abs(e) > 5) {
-			double[] coords = getXYValues(newOne, newTwo, newThree);
-			System.out.println("coords:" + coords[0] + ", " + coords[1]);
-			double[] chErr = ji(thetaOne, thetaTwo, thetaThree);
-			System.out.println("error: " + chErr[0]);
-			System.out.println("old: " + newOne);
-			newOne = newOne - chErr[0];
-			System.out.println("new: " + newOne);
-			newTwo = newTwo - chErr[1];
-			newThree = newThree - chErr[2];
-			//if |qs - qr | > |qr-qnear|
-			if (Math.abs(newOne-thetaOne+newTwo-thetaTwo+newThree-thetaThree) > Math.abs(thetaOne-nearThetaOne+thetaTwo-nearThetaTwo+thetaThree-nearThetaThree)) {
-				System.out.println("a");
-				return false;
-			}
-			e = task_error(newOne, newTwo, newThree);	
-			System.out.println(e);
-		}
-		return true;
-	}
 	
 	public double[][] j(double thetaOne, double thetaTwo, double thetaThree) {
 		double[] coords = getXYValues(thetaOne, thetaTwo, thetaThree);
 		double[][] j = new double[3][3];
 		
-		j[0][0] = -100*Math.sin(thetaOne) -50 * Math.sin(Math.sin(thetaOne + thetaTwo)) - 300 * Math.sin(Math.sin(thetaOne + thetaTwo + thetaThree));
-		j[0][1] = -50 * Math.sin(Math.sin(thetaOne + thetaTwo)) - 300 * Math.sin(Math.sin(thetaOne + thetaTwo + thetaThree));
-		j[0][2] = - 300 * Math.sin(Math.sin(thetaOne + thetaTwo + thetaThree));
-		j[1][0] = -100 * Math.cos(thetaOne) + 50 * Math.cos(Math.cos(thetaOne + thetaTwo)) + 300 * Math.sin(Math.sin((thetaOne + thetaTwo + thetaThree)));
-		j[1][1] =  50 * Math.cos(Math.cos((thetaOne + thetaTwo)) + 300 * Math.cos(Math.cos(thetaOne + thetaTwo + thetaThree)));
-		j[1][2] = 300 * Math.cos(Math.cos(thetaOne + thetaTwo + thetaThree));
+		j[0][0] = -2*Math.sin(thetaOne) -2 * Math.sin(Math.sin(thetaOne + thetaTwo)) - 1 * Math.sin(Math.sin(thetaOne + thetaTwo + thetaThree));
+		j[0][1] = -2 * Math.sin(Math.sin(thetaOne + thetaTwo)) - 1 * Math.sin(Math.sin(thetaOne + thetaTwo + thetaThree));
+		j[0][2] = - 1 * Math.sin(Math.sin(thetaOne + thetaTwo + thetaThree));
+		j[1][0] = -2 * Math.cos(thetaOne) + 2 * Math.cos(Math.cos(thetaOne + thetaTwo)) + 1 * Math.sin(Math.sin((thetaOne + thetaTwo + thetaThree)));
+		j[1][1] =  2 * Math.cos(Math.cos((thetaOne + thetaTwo)) + 1 * Math.cos(Math.cos(thetaOne + thetaTwo + thetaThree)));
+		j[1][2] = 1 * Math.cos(Math.cos(thetaOne + thetaTwo + thetaThree));
 		j[2][0] = 1;
 		j[2][1] = 1;
 		j[2][2] = 1;
 		
 		return j;
 	}
-	
-	public double[] ji(double thetaOne, double thetaTwo, double thetaThree) {
-			double e = task_error(thetaOne, thetaTwo, thetaThree);
-			double[] ij = new double[3];
-			double sinx = Math.sin(thetaOne);
-			double cosx = Math.cos(thetaOne);
-			double siny = Math.sin(thetaTwo);
-			double cosxy = Math.cos(thetaOne + thetaTwo);
-			double sinxy = Math.sin(thetaOne + thetaTwo);
-			double f = 50/(250*siny);
-			
-			
-			ij[0] = e * f * cosxy;
-			ij[1] = e * f * -(cosx + cosxy);
-			ij[2] = e * f * cosx;
-			
-			return ij;
-	}
+}	
 	
 	
-
-}
