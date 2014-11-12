@@ -16,7 +16,7 @@ class Bug(object):
         self.direction.normalize()
         self.distance_traveled = 0
         self.visited_points = []
-        self.state = None
+        self.state = State.Motion 
         self.euclidean_distance = self.position.distance_to(self.goal)
 
     def competitive_ratio(self):
@@ -54,23 +54,22 @@ class Bug(object):
         return False
 
 
-    def on_obstacle(self):
+    def in_obstacle(self):
 
-        collision = False
         for obstacle in self.obstacles:
-
-            # do 4 courners checking here
-            #upper_right_corner = Point(self.position.x + 1, self.position.y)
-            #lower_left_corner = Point(self.position.x, self.position.y - 1)
-            #lower_right_corner = Point(self.position.x + 1, self.position.y -1)
-            #if obstacle.contains(self.position) or obstacle.contains(upper_right_corner) or obstacle.contains(lower_left_corner) or obstacle.contains(lower_right_corner):
-            if obstacle.on_boundary(self.position):
-                collision = True
             if obstacle.contains(self.position):
-                return False
+                return True 
 
-        return collision 
+        return False
         
+    def on_obstacle_boundary(self):
+
+        for obstacle in self.obstacles:
+            if obstacle.on_boundary(self.position):
+                return True
+
+        return False
+
     def hasVisited(self):
 
         for visited in self.visited_points:

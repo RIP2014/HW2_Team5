@@ -60,7 +60,7 @@ for rec in rectangleData:
 #    rectangle_object.left += 20
 #    obstacle_visuals.append(rectangle_object)
 
-bug = BugOne(obstacles, bugStart, goal)
+bug = BugOne(obstacles, bugStart, goal, 90)
 screen = pygame.display.set_mode(screen_size, 0, 32)
 
 
