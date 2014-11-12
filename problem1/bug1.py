@@ -189,3 +189,218 @@ class BugOneB(Bug):
             self.circumnavigation_closest_point = Point(self.position.x, self.position.y)
         self.position.x += self.direction.x
         self.position.y += self.direction.y
+
+class BugTwo(Bug):
+
+    def __init__(self, obstacles, start, goal):
+
+        self.jump_points = []
+        slope_vector = Vector2D.from_points(start, goal)
+        if slope_vector.x == 0:
+            self.slope = None
+        else:
+            self.slope = slope_vector.y/slope_vector.x
+        self.point = Point(goal.x, goal.y)
+        super(BugTwo, self).__init__(obstacles, start, goal)
+
+    def on_m_line(self):
+
+        if not self.slope:
+            return self.position.x == self.point.x
+        else:
+            y_side = self.position.y - self.point.y
+            x_side = self.slope * (self.position.x - self.point.x)
+
+        print "M-LINE ??? --> {0}".format(y_side == x_side)
+        return y_side == x_side
+
+    def point_on_boundaries(self, point):
+
+        for obstacle in self.obstacles:
+            if obstacle.contains(point) or obstacle.on_boundary(point):
+                return True
+
+        return False
+
+    def clear_path(self):
+
+        # get vector from point to goal
+        heading_to_goal = Vector2D.from_points(self.point, self.goal)
+        heading_to_goal.normalize()
+        point = Point(self.position.x + heading_to_goal.x, self.position.y + heading_to_goal.y)
+        # check next point if in obstacle
+        print "clear_path ??? {0}".format(not self.point_on_boundaries(point))
+        return not self.point_on_boundaries(point)
+
+    def move(self):
+
+        if self.state == State.Circumnavigation:
+
+            if (self.on_m_line()) and self.clear_path() and not (self.position.x, self.position.y) in self.jump_points:
+
+                self.state = State.Motion
+                self.direction = Vector2D.from_points(self.position, self.goal)
+                self.direction.normalize()
+                self.jump_points.append((self.position.x, self.position.y))
+                self.position.x += self.direction.x
+                self.position.y += self.direction.y
+
+            elif self.in_obstacle() or not self.on_obstacle_boundary() or self.hasVisited():
+
+                # go back one step, and turn 90 degrees
+                print "circumnavigating but not on boundary of  obstacle, or inside.or repeat point"
+                self.position.x -= self.direction.x
+                self.position.y -= self.direction.y
+                self.visited_points.pop(len(self.visited_points)-1)
+
+                new_heading = math.radians(round(math.degrees(math.atan2(self.direction.y, self.direction.x))) + 90)
+                print "     NEW HEADING -> {0}".format(new_heading)
+                self.direction = Vector2D(math.cos(new_heading), math.sin(new_heading))
+
+            else:
+
+                print "normal circumnavigate"
+                self.visited_points.append(Point(self.position.x, self.position.y))
+                self.position.x += self.direction.x
+                self.position.y += self.direction.y
+                self.distance_traveled += 1
+
+
+        elif not self.in_obstacle() and not self.on_obstacle_boundary():
+
+            self.visited_points.append(Point(self.position.x, self.position.y))
+            self.position.x += self.direction.x
+            self.position.y += self.direction.y
+            self.updateHeading()
+            self.distance_traveled += 1
+            self.state = State.Motion
+            print "not on obstacle!"
+
+        else:
+
+                # new obstacle..begin circumnavigation
+                new_heading = math.radians(round(math.degrees(math.atan2(self.direction.y, self.direction.x))) + 90)
+                print "     NEW HEADING -> {0}".format(new_heading)
+                self.direction = Vector2D(math.cos(new_heading), math.sin(new_heading))
+                #self.direction.rotate(math.pi/2)
+                self.visited_points.append(Point(self.position.x, self.position.y))
+                # set 'end point' and variable for 'closest point'
+                self.position.x += 2 * self.direction.x
+                self.position.y += 2 * self.direction.y
+                self.distance_traveled += 1
+                self.state = State.Circumnavigation
+
+
+class BugTwoB(Bug):
+
+    def __init__(self, obstacles, start, goal):
+
+        self.jump_points = []
+        slope_vector = Vector2D.from_points(start, goal)
+        if slope_vector.x == 0:
+            self.slope = None
+        else:
+            self.slope = slope_vector.y/slope_vector.x
+        self.point = Point(goal.x, goal.y)
+        self.circumnavigation_obstacle = None
+        super(BugTwoB, self).__init__(obstacles, start, goal)
+
+    def on_m_line(self):
+
+        if not self.slope:
+            return self.position.x == self.point.x
+        else:
+            y_side = self.position.y - self.point.y
+            x_side = self.slope * (self.position.x - self.point.x)
+        return y_side - x_side < 2
+
+    def point_on_boundaries(self, point):
+
+        for obstacle in self.obstacles:
+            if obstacle.contains(point) or obstacle.on_boundary(point):
+                return True
+
+        return False
+
+    def clear_path(self):
+
+        # get vector from point to goal
+        heading_to_goal = Vector2D.from_points(self.point, self.goal)
+        #heading_to_goal.normalize()
+        point = Point(self.position.x + heading_to_goal.x, self.position.y + heading_to_goal.y)
+        # check next point if in obstacle
+        print "clear_path ??? {0}".format(not self.point_on_boundaries(point))
+        return not self.point_on_boundaries(point)
+
+    def scan_for_obstacles(self):
+    
+        close_obstacle = None
+        for obstacle in self.obstacles:
+
+            if obstacle.on_boundary(self.position):
+
+                close_obstacle = obstacle
+
+        return close_obstacle
+
+    def move(self):
+
+        if self.state == State.Motion:
+
+            scan_result = self.scan_for_obstacles()
+
+            if scan_result == None:
+
+                self.visited_points.append(Point(self.position.x, self.position.y))
+                self.position.x += self.direction.x
+                self.position.y += self.direction.y
+                self.updateHeading()
+                self.distance_traveled += 1
+
+            else:
+
+                # in range of an obstacle
+                self.circumnavigation_obstacle = scan_result
+                self.state = State.Circumnavigation
+                self.move_tangent_line()
+        
+        else:
+
+            # circumnavigating
+
+
+            # check for on m-line
+            if self.on_m_line() and self.clear_path():
+                self.visited_points = []
+                self.state = State.Motion
+                self.direction = Vector2D.from_points(self.position, self.goal)
+                self.direction.normalize()
+                self.circumnavigation_obstacle = None
+
+            else:
+
+                # normal circumnavigation
+                self.move_tangent_line()
+
+
+    def move_tangent_line(self):
+
+        print "IN TANGENT LINE"
+        slope_to_center = (-self.circumnavigation_obstacle.center.y + self.position.y) / (-self.circumnavigation_obstacle.center.x + self.position.x)
+        tangent_line_slope = (-1/slope_to_center)
+        if (self.position.y > self.circumnavigation_obstacle.center.y):
+            self.direction = Vector2D(1, tangent_line_slope)
+
+        elif (self.position.y < self.circumnavigation_obstacle.center.y and self.position.x < self.circumnavigation_obstacle.center.x):
+            self.direction = Vector2D(-1, abs(tangent_line_slope))
+
+        else:
+            self.direction = Vector2D(-1, -abs(tangent_line_slope))
+            
+        self.direction.normalize()
+        self.visited_points.append(Point(self.position.x, self.position.y))
+        self.distance_traveled += 1
+        self.position.x += self.direction.x
+        self.position.y += self.direction.y
+
+
