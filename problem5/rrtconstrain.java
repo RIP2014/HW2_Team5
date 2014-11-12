@@ -1,5 +1,6 @@
 import java.awt.*;
 import javax.swing.*;
+import Jama.*;
 
 
 public class rrtconstrain extends JPanel {
@@ -9,11 +10,11 @@ public class rrtconstrain extends JPanel {
 	//the pair x-y values of each two vertices connected by an edge.
 	// each adjacency is stored as {{x1, y1, x2, y2}}
 	private double[][] treeAdjacencies = new double[300][6];
-	private double deltaT = 10;
+	private double deltaT = 1;
 	private double newOne;
 	private double newTwo;
 	private double newThree;
-
+	
 	public rrtconstrain() {
 	
 	}
@@ -81,7 +82,8 @@ public class rrtconstrain extends JPanel {
 	
 	
 	public void run() {
-		double[] firstVertex = {300,300,300,300};
+
+		double[] firstVertex = {1.5707,1.2708,0,1.5707,1.2708,0};
 		treeVertices[0] = firstVertex;
 		int j = 1;
 		while (true) {
@@ -89,25 +91,71 @@ public class rrtconstrain extends JPanel {
 			boolean goalLocated = false;
 			
 			while (j < 300) {
-			//build the tree:
-			//Step 1: sample random node
-			double newThetaOne = Math.random() * 2 * Math.PI;
-			double newThetaTwo = Math.random() * 2 * Math.PI;
-			double newThetaThree = Math.random() * 2 * Math.PI;
-			double[] coords = getXYValues(newThetaOne, newThetaTwo, newThetaThree);
-			double newX = coords[0];
-			double newY = coords[1];
-			//Step 2: find closest neighbor to that node
-			double[] parentNode = nearestNeighbor(newThetaOne, newThetaTwo, newThetaThree, j);
+				//build the tree:
+				//Step 1: sample random node
+				double newThetaOne = Math.random() * 2 * Math.PI;
+				double newThetaTwo = Math.random() * 2 * Math.PI;
+				double newThetaThree = Math.random() * 2 * Math.PI;
+				
+				double[] coords = getXYValues(newThetaOne, newThetaTwo, newThetaThree);
+				double newX = coords[0];
+				double newY = coords[1];
+				//Step 2: find closest neighbor to that node
+				double[] parentNode = nearestNeighbor(newThetaOne, newThetaTwo, newThetaThree, j);
+				
+				//step 3
+				double error = Math.abs(newY - 3);
+				
+				double dx = 0;
+				double dy = error*deltaT;
+				double dtheta = 0;
+				
+				double[][] vals = {{dx,dy,dtheta}};
+				
+				Matrix endEffector = new Matrix(vals);
+				
+				Matrix a = new Matrix(j(newThetaOne,newThetaTwo,newThetaThree));
+				
+				Matrix velocity = a.inverse().times(endEffector);		
+				
+				double[] parentNodeAsVertices = getXYValues(parentNode[0], parentNode[1], parentNode[2]);
+				double dirVectorOne = (newThetaOne - parentNode[0]);
+				double dirVectorTwo = (newThetaTwo - parentNode[1]);
+				double dirVectorThree = (newThetaThree - parentNode[2]);
+				double sumSq = Math.sqrt(Math.pow(dirVectorOne,2) + Math.pow(dirVectorTwo,2) + Math.pow(dirVectorThree,2));
+	
+				newOne = parentNode[0] + dirVectorOne * deltaT/sumSq;
+				newTwo = parentNode[1] + dirVectorTwo * deltaT/sumSq;
+				newThree = parentNode[2] + dirVectorThree * deltaT/sumSq;
+				
+				double[][] d = {{newOne,newTwo,newThree}};
+				Matrix newNode = new Matrix(d);
+	
+				newNode = newNode.minus(velocity);
+				
+				
+				
+				
+			
+			
+			
+			
+			
+			
+			
+			/*
 			//Step 3: Calculate q(s) that is a set distance along the vertex between closest to random
 			double[] parentNodeAsVertices = getXYValues(parentNode[0], parentNode[1], parentNode[2]);
-			double dirVectorOne = (newThetaOne - parentNode[0]) / Math.abs(newThetaOne - parentNode[0]);
-			double dirVectorTwo = (newThetaTwo - parentNode[1]) / Math.abs(newThetaTwo - parentNode[1]);
-			double dirVectorThree = (newThetaThree - parentNode[2]) / Math.abs(newThetaThree - parentNode[2]);
-			newOne = parentNode[0] + dirVectorOne * deltaT;
-			newTwo = parentNode[1] + dirVectorTwo * deltaT;
-			newThree = parentNode[2] + dirVectorThree * deltaT;
-			System.out.println("test1");
+			double dirVectorOne = (newThetaOne - parentNode[0]);
+			double dirVectorTwo = (newThetaTwo - parentNode[1]);
+			double dirVectorThree = (newThetaThree - parentNode[2]);
+			double sumSq = Math.sqrt(Math.pow(dirVectorOne,2) + Math.pow(dirVectorTwo,2) + Math.pow(dirVectorThree,2));
+
+			newOne = parentNode[0] + dirVectorOne * deltaT/sumSq;
+			newTwo = parentNode[1] + dirVectorTwo * deltaT/sumSq;
+			newThree = parentNode[2] + dirVectorThree * deltaT/sumSq;
+			
+			
 			//Step 4: Compute the error between pose of candidate node and workspace criteria
 			if (newConfig(newOne, newTwo, newThree, parentNode[0], parentNode[1], parentNode[2])) {
 				double[] newVertex = {newThetaOne, newThetaTwo, newThetaThree, parentNode[0], parentNode[1], parentNode[2]};
@@ -117,7 +165,7 @@ public class rrtconstrain extends JPanel {
 			//Step 5: Move node to goal node with jacobian control such that error is diminished
 			
 			//Step 6: add that new node to the tree
-
+*/
 			j = j + 1;
 			System.out.println(j);
 			}
@@ -251,12 +299,12 @@ public class rrtconstrain extends JPanel {
 		double[] coords = getXYValues(thetaOne, thetaTwo, thetaThree);
 		double[][] j = new double[3][3];
 		
-		j[0][0] = -2 * Math.cos(thetaOne) - 2 * Math.cos(thetaOne + thetaTwo) - 1 * Math.cos(thetaOne + thetaTwo + thetaThree);
-		j[0][1] = -2 * Math.cos(thetaOne + thetaTwo) - 1 * Math.cos(thetaOne + thetaTwo + thetaThree);
-		j[0][2] = -1 * Math.cos(thetaOne + thetaTwo + thetaThree);
-		j[0][0] = -2 * Math.sin(thetaOne) - 2 * Math.sin(thetaOne + thetaTwo) - 1 * Math.sin(thetaOne + thetaTwo + thetaThree);
-		j[0][1] = -2 * Math.sin(thetaOne + thetaTwo) - 1 * Math.sin(thetaOne + thetaTwo + thetaThree);
-		j[0][2] = -1 * Math.sin(thetaOne + thetaTwo + thetaThree);
+		j[0][0] = -100*Math.sin(thetaOne) -50 * Math.sin(Math.sin(thetaOne + thetaTwo)) - 300 * Math.sin(Math.sin(thetaOne + thetaTwo + thetaThree));
+		j[0][1] = -50 * Math.sin(Math.sin(thetaOne + thetaTwo)) - 300 * Math.sin(Math.sin(thetaOne + thetaTwo + thetaThree));
+		j[0][2] = - 300 * Math.sin(Math.sin(thetaOne + thetaTwo + thetaThree));
+		j[1][0] = -100 * Math.cos(thetaOne) + 50 * Math.cos(Math.cos(thetaOne + thetaTwo)) + 300 * Math.sin(Math.sin((thetaOne + thetaTwo + thetaThree)));
+		j[1][1] =  50 * Math.cos(Math.cos((thetaOne + thetaTwo)) + 300 * Math.cos(Math.cos(thetaOne + thetaTwo + thetaThree)));
+		j[1][2] = 300 * Math.cos(Math.cos(thetaOne + thetaTwo + thetaThree));
 		j[2][0] = 1;
 		j[2][1] = 1;
 		j[2][2] = 1;
@@ -281,5 +329,7 @@ public class rrtconstrain extends JPanel {
 			
 			return ij;
 	}
+	
+	
 
 }
