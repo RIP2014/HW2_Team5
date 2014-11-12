@@ -80,17 +80,21 @@ public class armvismultiobstacles extends JPanel {
 		
 		//draw each vertex
 		g.setColor(Color.GREEN);
-		for (int i=0;i<this.theTree.vertexList.length;i++) {
-			if (this.theTree.vertexList[i] != null) {
-				drawVertex((int)this.theTree.vertexList[i].x,(int)this.theTree.vertexList[i].y, g);
+		if(this.theTree != null){
+			for (int i=0;i<this.theTree.vertexList.length;i++) {
+				if (this.theTree.vertexList[i] != null) {
+					drawVertex((int)this.theTree.vertexList[i].x,(int)this.theTree.vertexList[i].y, g);
+				}
 			}
 		}
 		
 		//draw each edge
 		g.setColor(Color.BLACK);
-		for (int i=0;i<this.theTree.edgeList.length;i++) {
-			if (this.theTree.edgeList[i][0] != null){
-				drawEdge(this.theTree.edgeList[i][0].x, this.theTree.edgeList[i][1].x, this.theTree.edgeList[i][0].y, this.theTree.edgeList[i][1].y,g);
+		if(this.theTree != null){
+			for (int i=0;i<this.theTree.edgeList.length;i++) {
+				if (this.theTree.edgeList[i][0] != null){
+					drawEdge(this.theTree.edgeList[i][0].x, this.theTree.edgeList[i][1].x, this.theTree.edgeList[i][0].y, this.theTree.edgeList[i][1].y,g);
+				}
 			}
 		}
 		
@@ -279,7 +283,7 @@ public class armvismultiobstacles extends JPanel {
 		currCoords[1] = (300 - a3y2) / 50;
 		currCoords[2] = a3theta;
 		try {
-			Thread.sleep(50);
+			Thread.sleep(5);
 		}
 		catch (InterruptedException e) {
 			
