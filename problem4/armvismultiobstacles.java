@@ -5,7 +5,7 @@ import javax.swing.*;
 import java.util.concurrent.*;
 
 //import RRT;
-
+@SuppressWarnings({ "unused", "serial" })
 public class armvismultiobstacles extends JPanel {
 	private float armOneLength = 100;
 	private float armTwoLength = 100;
@@ -135,10 +135,10 @@ public class armvismultiobstacles extends JPanel {
 	public void run2() {
 		/*RRT.Node o = this.theTree.new Node(250, 250);
 		o.setParent(o);*/
-		this.theTree = new RRT(250, 250, 10000, obstacles);
+		this.theTree = new RRT(300, 300, 300, obstacles);
 		repaint();
 	}
-
+/*
 	public void run() {
 
 		while (currCoords[0]<1000000) {
@@ -359,7 +359,7 @@ public class armvismultiobstacles extends JPanel {
 	}
 
 	//Origin must have its parent set as itself!!!
-	/*private class RRT {
+	private class RRT {
 		private Node origin;
 		public Node[] vertexList;
 		public Node[][] edgeList;
@@ -455,10 +455,10 @@ public class armvismultiobstacles extends JPanel {
 		Node temp = new Node(v.x + t * (w.x - v.y), v.y + t * (w.x - v.y));
 		d = Math.sqrt(dist2(p,temp));
 		return new holder(temp, d, v, w, p);
-	}*/
+	}
+*/
 
-
-
+/*
 	private holder distP2S(Node P, Node A, Node B) {
 		vec v = new vec(B, A);
 		vec w = new vec(P, A);
@@ -477,7 +477,7 @@ public class armvismultiobstacles extends JPanel {
 		h = new vec(P, Pb);
 		return new holder(Pb, Math.sqrt(((h.x)*(h.x))+((h.y)*(h.y))), A, B, P, 2);
 	}
-
+*/
 	private class vec {
 		public double x;
 		public double y;
@@ -491,6 +491,7 @@ public class armvismultiobstacles extends JPanel {
 		return (A.x * B.x + A.y * B.y);
 	}
 
+	@SuppressWarnings("unused")
 	private class holder {
 		public Node mid;
 		public double dist;
@@ -508,6 +509,7 @@ public class armvismultiobstacles extends JPanel {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	public class Node {
 		public double x;
 		public double y;
