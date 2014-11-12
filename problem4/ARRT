@@ -1,0 +1,124 @@
+public class ARRT {
+	private Node origin;
+	public Node[] vertexList;
+	public Node[][] edgeList;
+	public ARRT(int a0, int b0, int c0, int iter, int af, int bf, int cf) {
+		// TODO Auto-generated constructor stub
+		origin = new Node(a0, b0, c0);
+		origin.setParent(origin);
+		int count = 1;
+		int eCount = 0;
+		vertexList = new Node[2*iter];
+		edgeList = new Node[4*iter][2];
+		vertexList[0] = origin;
+		while (count < iter) {
+			Node p = new Node(Math.random()*2*Math.PI,Math.random()*2*Math.PI,Math.random()*2*Math.PI);
+			holder np = findClose(p, origin);
+			
+			count++;
+		}
+	}
+	
+	private holder findClose(Node p, Node o) {
+		holder ans = null;
+		for (int i = 0; i < 3; i++) {
+			if(o.children[i] != null) {
+				holder pnp = findClose(p, o.children[i]);
+				if (ans == null ) {
+					ans = pnp;
+				} else {
+					if (pnp.dist < ans.dist) {
+						ans = pnp;
+					}
+				}
+			}
+
+		}
+		holder pnp = distP2C(p, o, o.parent);
+		if (ans == null) {
+			ans = pnp;
+		} else {
+			if (pnp.dist < ans.dist) {
+				ans = pnp;
+			}
+		}
+		return ans;
+	}
+	//Calculate the shortest distance to the tree
+	public holder distP2C(Node p, Node young, Node old){
+		if (young.a == p.a) {
+			return new holder(new Node());
+		} else if (young.b == p.b) {
+			
+		} else if (young.c == p.c) {
+			
+		} else {
+			
+		}
+	}
+	//The holder to return multiple things at once
+	private class holder {
+		public Node mid;
+		public double dist;
+		public Node old;
+		public Node young;
+		public Node rand;
+		//public int marker;
+		public holder(Node p, double d, Node A, Node B, Node rand) {
+			mid = p;
+			dist = d;
+			young = A;
+			old = B;
+			this.rand = rand;
+			//marker = n;
+		}
+	}
+	
+	public class Node {
+		public double x;
+		public double y;
+		public double a;
+		public double b;
+		public double c;
+		public Node parent = null;
+		private Node[] children = new Node[3];
+		public Node(double a, double b, double c) {
+			this.a = a;
+			this.b = b;
+			this.c = c;
+			//this.x = Math.cos()
+		}
+
+		public void setParent(Node o) {
+			this.parent = o;
+		}
+
+		public boolean addChild(Node c){
+			for (int i = 0; i < 3; i++) {
+				if (children[i] == null) {
+					children[i] = c;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public boolean replaceChild(Node n, Node o) {
+			for (int i = 0; i < 3; i++) {
+				if (children[i].equals(o)) {
+					children[i] = n;
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (o instanceof Node && this.a == ((Node) o).a && this.b == ((Node) o).b && this.c == ((Node) o).c) {
+				return true;
+			}
+			return false;
+		}
+	}
+}
