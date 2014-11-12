@@ -225,7 +225,7 @@ class BugTwo(Bug):
     def clear_path(self):
 
         # get vector from point to goal
-        heading_to_goal = Vector2D.from_points(self.point, self.goal)
+        heading_to_goal = Vector2D.from_points(self.position, self.goal)
         heading_to_goal.normalize()
         point = Point(self.position.x + heading_to_goal.x, self.position.y + heading_to_goal.y)
         # check next point if in obstacle
