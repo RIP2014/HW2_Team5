@@ -110,12 +110,11 @@ public class rrtconstrain extends JPanel {
 				double dy = error*deltaT;
 				double dtheta = 0;
 				
-				double[][] vals = {{dx,dy,dtheta}};
+				double[][] vals = {{dx},{dy},{dtheta}};
 				
 				Matrix endEffector = new Matrix(vals);
 				
 				Matrix a = new Matrix(j(newThetaOne,newThetaTwo,newThetaThree));
-				
 				Matrix velocity = a.inverse().times(endEffector);		
 				
 				double[] parentNodeAsVertices = getXYValues(parentNode[0], parentNode[1], parentNode[2]);
@@ -128,12 +127,18 @@ public class rrtconstrain extends JPanel {
 				newTwo = parentNode[1] + dirVectorTwo * deltaT/sumSq;
 				newThree = parentNode[2] + dirVectorThree * deltaT/sumSq;
 				
-				double[][] d = {{newOne,newTwo,newThree}};
+				double[][] d = {{newOne},{newTwo},{newThree}};
 				Matrix newNode = new Matrix(d);
 	
 				newNode = newNode.minus(velocity);
 				
-				
+				if(Math.abs(newNode.get(1,0) - 3) < 3){
+					j = j+1;
+					double[] newVertex = {newNode.get(0,0), newNode.get(1,0), newNode.get(2,0), parentNode[0], parentNode[1], parentNode[2]};
+					treeVertices[j] = (newVertex);
+					treeAdjacencies[j] = (newVertex);
+
+				}
 				
 				
 			
@@ -166,7 +171,6 @@ public class rrtconstrain extends JPanel {
 			
 			//Step 6: add that new node to the tree
 */
-			j = j + 1;
 			System.out.println(j);
 			}
 			
